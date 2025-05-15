@@ -1,6 +1,8 @@
 package tasks.adts
+
 import u03.extensionmethods.Optionals.*
 import u03.extensionmethods.Sequences.*
+import u03.extensionmethods.Sequences.Sequence.*
 
 /*  Exercise 2: 
  *  Implement the below trait, and write a meaningful test.
@@ -111,21 +113,25 @@ object SchoolModel:
        */
       def hasCourse(name: String): Boolean
   object BasicSchoolModule extends SchoolModule:
-    override type School = Nothing
-    override type Teacher = Nothing
-    override type Course = Nothing
+    override type School = Sequence[(Teacher, Course)]
+    override type Teacher = String
+    override type Course = String
 
-    def teacher(name: String): Teacher = ???
-    def course(name: String): Course = ???
-    def emptySchool: School = ???
+    def teacher(name: String): Teacher = name
+    def course(name: String): Course = name
+    def emptySchool: School = Nil()
 
     extension (school: School)
-      def courses: Sequence[String] = ???
-      def teachers: Sequence[String] = ???
-      def setTeacherToCourse(teacher: Teacher, course: Course): School = ???
-      def coursesOfATeacher(teacher: Teacher): Sequence[Course] = ???
-      def hasTeacher(name: String): Boolean = ???
-      def hasCourse(name: String): Boolean = ???
+      def courses: Sequence[String] = school match
+        case Cons((t, c), tail) => Cons(c, tail.filter((t1,c1) => c1 != c).courses)
+        case _ => Nil()
+      def teachers: Sequence[String] = school match
+        case Cons((t, c), tail) => Cons(t, tail.filter((t1,c1) => t1 != t).teachers)
+        case _ => Nil()
+      def setTeacherToCourse(teacher: Teacher, course: Course): School = school.concat(Cons((teacher, course), Nil()))
+      def coursesOfATeacher(teacher: Teacher): Sequence[Course] = school.filter((t, c) => t == teacher).map((t,c) => c)
+      def hasTeacher(name: String): Boolean = school.teachers.filter(t => t == name) != Nil()
+      def hasCourse(name: String): Boolean = school.courses.filter(c => c == name) != Nil()
 @main def examples(): Unit =
   import SchoolModel.BasicSchoolModule.*
   val school = emptySchool
