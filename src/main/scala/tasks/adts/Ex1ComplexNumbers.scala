@@ -29,11 +29,10 @@ object Ex1ComplexNumbers:
         case Complex(_, i) => i
       def sum(other: Complex): Complex = complex(c.re() + other.re(), c.im() + other.im())
       def subtract(other: Complex): Complex = complex(c.re() - other.re(), c.im() - other.im())
-      def asString(): String = c match {
+      def asString(): String = c match
         case Complex(r, i) if r == 0 && i == 0 => "0.0"
         case Complex(r, i) if r == 0 && i > 0 => i + "i"
         case Complex(r, i) if r == 0 && i < 0 => "-" + -i + "i"
         case Complex(r, i) if i == 0 => "" + r
         case Complex(r, i) if i > 0 => r + " + " + i + "i"
         case Complex(r, i) if i < 0 => r + " - " + -i + "i"
-      }
