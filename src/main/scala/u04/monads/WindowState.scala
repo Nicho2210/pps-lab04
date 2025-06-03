@@ -13,36 +13,43 @@ trait WindowState:
   def show(): State[Window, Unit]
   def exec(cmd: =>Unit): State[Window, Unit]
   def eventStream(): State[Window, Stream[String]]
+  def addTextField(text: String, name: String): State[Window, Unit]
+  def readTextField(name: String): State[Window, String]
 
 object WindowStateImpl extends WindowState:
   import SwingFunctionalFacade.*
-  
+
   type Window = Frame
-  
-  
+
+
   def initialWindow: Window = createFrame
 
-  def setSize(width: Int, height: Int): State[Window, Unit] = 
-    State(w => ((w.setSize(width, height)), {}))
+  def setSize(width: Int, height: Int): State[Window, Unit] =
+    State(w => (w.setSize(width, height), {}))
   def addButton(text: String, name: String): State[Window, Unit] =
-    State(w => ((w.addButton(text, name)), {}))
+    State(w => (w.addButton(text, name), {}))
   def addLabel(text: String, name: String): State[Window, Unit] =
-    State(w => ((w.addLabel(text, name)), {}))
+    State(w => (w.addLabel(text, name), {}))
   def toLabel(text: String, name: String): State[Window, Unit] =
-    State(w => ((w.showToLabel(text, name)), {}))
+    State(w => (w.showToLabel(text, name), {}))
   def show(): State[Window, Unit] =
     State(w => (w.show, {}))
   def exec(cmd: =>Unit): State[Window, Unit] =
-    State(w => (w, cmd))  
+    State(w => (w, cmd))
   def eventStream(): State[Window, Stream[String]] =
     State(w => (w, Stream.generate(() => w.events().get)))
-  
+  def addTextField(text: String, name: String): State[Window, Unit] =
+    State(w => (w.addTextField(text, name), {}))
+  def readTextField(name: String): State[Window, String] =
+    State(w => (w, w.readTextField(name)))
+
+
 @main def windowStateExample =
   import u04.*
   import WindowStateImpl.*
   import u03.extensionmethods.Streams.*
 
-  val windowCreation = for 
+  val windowCreation = for
     _ <- setSize(300, 300)
     _ <- addButton(text = "inc", name = "IncButton")
     _ <- addButton(text = "dec", name = "DecButton")
@@ -56,9 +63,9 @@ object WindowStateImpl extends WindowState:
     _ <- windowCreation
     e <- eventStream()
     _ <- seqN(e.map(_ match
-        case "IncButton" => toLabel("i", "Label1")
-        case "DecButton" => toLabel("d", "Label1")
-        case "QuitButton" => exec(sys.exit())))
+      case "IncButton" => toLabel("i", "Label1")
+      case "DecButton" => toLabel("d", "Label1")
+      case "QuitButton" => exec(sys.exit())))
   yield ()
 
   windowEventsHandling.run(initialWindow)

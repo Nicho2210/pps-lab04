@@ -10,20 +10,22 @@ trait CounterState:
   def reset(): State[Counter, Unit]
   def get(): State[Counter, Int]
   def nop(): State[Counter, Unit]
+  def set(n: Int): State[Counter, Unit]
 
 object CounterStateImpl extends CounterState:
   opaque type Counter = Int
-  
+
   def initialCounter(): Counter = 0
 
   // giving (new_counter, result)
-  def inc(): State[Counter, Unit] = State(i => (i + 1, ()));
-  def dec(): State[Counter, Unit] = State(i => (i - 1, ()));
-  def reset(): State[Counter, Unit] = State(i => (0, ()));
-  def get(): State[Counter, Int] = State(i => (i, i));
-  def nop(): State[Counter, Unit] = State(i => (i, ()));
+  def inc(): State[Counter, Unit] = State(i => (i + 1, ()))
+  def dec(): State[Counter, Unit] = State(i => (i - 1, ()))
+  def reset(): State[Counter, Unit] = State(i => (0, ()))
+  def get(): State[Counter, Int] = State(i => (i, i))
+  def nop(): State[Counter, Unit] = State(i => (i, ()))
+  def set(n: Int): State[Counter, Unit] = State(i => (n, ()))
 
-@main def tryCounterState =
+@main def tryCounterState(): Unit =
   import Monads.*, Monad.*, States.{*, given}, State.*
   val counterState: CounterState = CounterStateImpl
   import counterState.*  // or directly, import CounterStateImpl.*
@@ -40,10 +42,10 @@ object CounterStateImpl extends CounterState:
       for
         _ <- increment(n - 1)
         _ <- inc()
-      yield ()  
+      yield ()
 
   val session: State[Counter, Int] =
-    for 
+    for
       _ <- inc()
       _ <- reset()
       _ <- increment(5)
